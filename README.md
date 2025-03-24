@@ -4,6 +4,9 @@
 
 **TablerPicker** is a lightweight, customizable JavaScript library that allows users to select SVG icons from organized categories. Ideal for CMS, form builders, admin panels, or any web application where icon selection is needed.
 
+## 🔗 Live Demo
+
+👉 [Click here to try the demo](https://wonchoe.github.io/tabler-icons-font-picker/)
 ---
 
 ## 🚀 Features
