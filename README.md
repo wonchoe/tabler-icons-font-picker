@@ -1,5 +1,7 @@
 # 🌟 TablerPicker - SVG Icon Picker
 
+<img src="/assets/tabler.jpg" width="400px" alt="TablerPicker Preview">
+
 **TablerPicker** is a lightweight, customizable JavaScript library that allows users to select SVG icons from organized categories. Ideal for CMS, form builders, admin panels, or any web application where icon selection is needed.
 
 ---
