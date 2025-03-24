@@ -20,6 +20,10 @@
 - 🌀 Lazy loading for performance
 - 🛠 Fully customizable (dimensions, direction, category filtering)
 - 🧠 Supports data attributes (`data-selected-icon`, `data-details`)
+- 🧩 Supports custom icon sets via JSON or JS object
+- 📌 Default category selection
+- 💥 Auto-destroy when container is removed
+- 🧼 Manual `destroy()` method to clean up
 
 ---
 
@@ -49,6 +53,7 @@
       'Devices', 'Media', 'Math', 'Design', 'Badges', 'Logic',
       'Document', 'Photography', 'Currencies'
     ],
+    defaultCategory: 'UI', // ⬅️ Load a preferred category by default
     onPick: (icon) => {
       console.log('✅ Picked icon:', icon);
       // icon = { file, path, fullUrl, ref }
@@ -59,17 +64,66 @@
 
 ---
 
+## 🧩 Using `jsonObject` instead of `jsonUrl`
+
+You can pass your own icon data directly as a JavaScript object:
+
+```js
+const myIcons = {
+  baseUrl: '/icons/',
+  categories: {
+    UI: [
+      { file: 'menu.svg', path: 'ui/menu.svg' },
+      { file: 'close.svg', path: 'ui/close.svg' }
+    ],
+    Social: [
+      { file: 'facebook.svg', path: 'social/facebook.svg' }
+    ]
+  }
+};
+
+TablerPicker.create({
+  el: document.getElementById('iconInput'),
+  jsonObject: myIcons,
+  defaultCategory: 'UI',
+  onPick: (icon) => {
+    console.log('Icon picked:', icon);
+  }
+});
+```
+
+No `fetch()` required — fast and fully customizable.
+
+---
+
 ## ⚙️ Parameters
 
-| Parameter       | Type       | Default       | Description |
-|----------------|------------|----------------|-------------|
-| `el`           | HTMLElement| —              | Required. The DOM element to attach the picker to |
-| `onPick`       | Function   | —              | Callback fired when an icon is picked |
-| `popupWidth`   | Number     | `300`          | Popup width in pixels |
-| `popupHeight`  | Number     | `300`          | Popup height in pixels |
-| `direction`    | String     | `'down'`       | Direction of popup (`'up'`, `'down'`, `'left'`, `'right'`) |
-| `buttonWidth`  | String     | `'max-content'`| Width of the main button |
-| `ignoreList`   | Array      | `[]`           | List of category names to hide from the picker |
+| Parameter         | Type       | Default         | Description |
+|------------------|------------|------------------|-------------|
+| `el`             | HTMLElement| —                | Required. The DOM element to attach the picker to |
+| `onPick`         | Function   | —                | Callback fired when an icon is picked |
+| `popupWidth`     | Number     | `300`            | Popup width in pixels |
+| `popupHeight`    | Number     | `300`            | Popup height in pixels |
+| `direction`      | String     | `'down'`         | Direction of popup (`'up'`, `'down'`, `'left'`, `'right'`) |
+| `buttonWidth`    | String     | `'max-content'`  | Width of the main button |
+| `ignoreList`     | Array      | `[]`             | List of category names to hide from the picker |
+| `jsonUrl`        | String     | —                | Path to a custom JSON file with icons |
+| `jsonObject`     | Object     | —                | Provide a JS object instead of a remote JSON file |
+| `defaultCategory`| String     | `first available`| Specify which category to show and use by default |
+
+---
+
+## 🔄 Destroying the Picker
+
+You can manually destroy a picker instance to clean up DOM and memory:
+
+```js
+const picker = TablerPicker.create({...});
+...
+picker.destroy();
+```
+
+Or let it auto-destroy when its container is removed from the DOM (default behavior).
 
 ---
 
@@ -110,8 +164,9 @@ This includes:
 
 You can fully replace the icon set with your own:
 - Replace the contents of `icon-categories.json` with your custom categories and icon paths
+- Or provide a full JS object via `jsonObject`
 - Store your SVGs locally or use a CDN
-- Update the `baseUrl` field inside the JSON
+- Update the `baseUrl` field inside the JSON or object
 
 ```json
 {
@@ -132,7 +187,6 @@ This makes it possible to turn TablerPicker into your **own custom icon library*
 
 MIT — use, modify and share freely 🚀  
 Icons belong to their respective author Tabler. Attribution is appreciated.
-
 
 ---
 

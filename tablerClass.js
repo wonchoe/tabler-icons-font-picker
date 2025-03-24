@@ -13,7 +13,7 @@
         return new TablerPicker(options);
       }
   
-      constructor({ el, onPick, popupWidth = 300, popupHeight = 300, direction = 'down', buttonWidth, ignoreList = [] }) {
+      constructor({ el, onPick, popupWidth = 300, popupHeight = 500, direction = 'down', buttonWidth, ignoreList = [], jsonUrl = null, jsonObject = null, defaultCategory = null }) {
         this.container = el;
         this.onPick = onPick;
         this.popupWidth = popupWidth;
@@ -21,18 +21,53 @@
         this.direction = direction;
         this.buttonWidth = buttonWidth;
         this.ignoreList = ignoreList;
-        this.jsonUrl = this._getBasePath() + 'icon-categories.json';
         this.panel = null;
         this.baseUrl = '';
         this.categories = {};
         this.filteredIcons = [];
         this.selectEl = null;
         this.iconsLoaded = false;
+        this.jsonUrl = jsonUrl;
+        this.jsonObject = jsonObject;
+        this.defaultCategory = defaultCategory;
+  
         this._createStyles();
         this._createStructure();
         this._attachEvents();
         this._loadIcons();
         this._observeSelectedIcon();
+        this._observeContainerRemoval();
+      }
+  
+      _observeContainerRemoval() {
+        this._removalObserver = new MutationObserver(() => {
+          if (!document.body.contains(this.container)) {
+            this.destroy();
+          }
+        });
+        this._removalObserver.observe(document.body, { childList: true, subtree: true });
+      }
+  
+      destroy() {
+        if (this.buttonWrapper && this.buttonWrapper.parentNode) {
+          this.buttonWrapper.remove();
+        }
+        if (this._removalObserver) {
+          this._removalObserver.disconnect();
+        }
+        if (this._mutationObserver) {
+          this._mutationObserver.disconnect();
+        }
+        document.removeEventListener('click', this._boundClickHandler);
+  
+        this.container = null;
+        this.panel = null;
+        this.button = null;
+        this.buttonWrapper = null;
+        this.selectEl = null;
+        this.filteredIcons = [];
+        this.categories = {};
+        this.iconsLoaded = false;
       }
   
       _getBasePath() {
@@ -201,12 +236,25 @@
       }
   
       _getDefaultIcon() {
+        const fallbackCategory = Object.keys(this.categories)[0];
+        const category = this.defaultCategory && this.categories[this.defaultCategory] ? this.defaultCategory : fallbackCategory;
+        const firstIcon = this.categories[category]?.[0];
+  
+        if (category && firstIcon) {
+          return {
+            icon: firstIcon.file,
+            path: firstIcon.path,
+            ref: `${category}.${firstIcon.file}`
+          };
+        }
+  
         return {
-          icon: 'star.svg',
-          path: 'filled/star.svg',
-          ref: 'Other.star.svg'
+          icon: '',
+          path: '',
+          ref: ''
         };
       }
+  
   
       _getIconByName(name) {
         const allIcons = Object.values(this.categories).flat();
@@ -227,29 +275,36 @@
       }
   
       _loadIcons() {
-        fetch(this.jsonUrl)
-          .then(res => res.json())
-          .then(data => {
-            this.baseUrl = data.baseUrl.endsWith('/') ? data.baseUrl : data.baseUrl + '/';
-            this.categories = data.categories;
-            this._filterIgnoredCategories();
-            this._buildCategorySelector();
-            this._preloadDefaultCategory();
-            this.iconsLoaded = true;
-  
-            if (!this.container.dataset.details && !this.container.dataset.selectedIcon) {
-              const def = this._getDefaultIcon();
-              this.container.dataset.details = JSON.stringify(def);
-              this.container.dataset.selectedIcon = def.ref;
-            }
-  
-            this._updateIcon();
-          })
-          .catch(err => {
-            this.panel.innerHTML = '<p style="color:red">Failed to load icons</p>';
-            console.error('Icon Picker Error:', err);
-          });
+        if (this.jsonObject) {
+          this._applyIconData(this.jsonObject);
+        } else {
+          const urlToFetch = this.jsonUrl || (this._getBasePath() + 'icon-categories.json');
+          fetch(urlToFetch)
+            .then(res => res.json())
+            .then(data => this._applyIconData(data))
+            .catch(err => {
+              this.panel.innerHTML = '<p style="color:red">Failed to load icons</p>';
+              console.error('Icon Picker Error:', err);
+            });
+        }
       }
+
+      _applyIconData(data) {
+        this.baseUrl = data.baseUrl?.endsWith('/') ? data.baseUrl : (data.baseUrl || '') + '/';
+        this.categories = data.categories || {};
+        this._filterIgnoredCategories();
+        this._buildCategorySelector();
+        this._preloadDefaultCategory();
+        this.iconsLoaded = true;
+  
+        if (!this.container.dataset.details && !this.container.dataset.selectedIcon) {
+          const def = this._getDefaultIcon();
+          this.container.dataset.details = JSON.stringify(def);
+          this.container.dataset.selectedIcon = def.ref;
+        }
+  
+        this._updateIcon();
+      }      
   
       _filterIgnoredCategories() {
         for (const category of this.ignoreList) {
@@ -258,14 +313,24 @@
       }
   
       _preloadDefaultCategory() {
-        const firstCategory = Object.keys(this.categories)[0];
-        if (firstCategory) {
-          this._renderCategoryIcons(firstCategory);
+        const fallbackCategory = Object.keys(this.categories)[0];
+        const preloadCategory = this.defaultCategory && this.categories[this.defaultCategory] ? this.defaultCategory : fallbackCategory;
+        if (preloadCategory) {
+          this._renderCategoryIcons(preloadCategory);
           if (this.selectEl) {
-            this.selectEl.value = firstCategory;
+            this.selectEl.value = preloadCategory;
           }
         }
       }
+
+      _attachEvents() {
+        this._boundClickHandler = (e) => {
+          if (!this.panel.contains(e.target) && !this.button.contains(e.target)) {
+            this.panel.style.display = 'none';
+          }
+        };
+        document.addEventListener('click', this._boundClickHandler);
+      }      
   
       _buildCategorySelector() {
         this.panel.innerHTML = '';
