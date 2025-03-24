@@ -1,3 +1,12 @@
+/**
+ * TablerPicker - SVG Icon Picker with Category Support
+ * 
+ * @author Oleksii Semeniuk
+ * @github https://github.com/wonchoe/tabler-icons-font-picker
+ * @license MIT
+ * @version 1.0.0
+ */
+ 
 (function (global) {
     class TablerPicker {
       static create(options) {
