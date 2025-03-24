@@ -6,10 +6,9 @@
 
 ## 🚀 Features
 
-- 📁 Category support (Tabler, Bootstrap, FontAwesome, and more)
+- 📁 Category support
 - 🔎 Icon search
 - 🌀 Lazy loading for performance
-- 🧩 Easy integration via CDN or local files
 - 🛠 Fully customizable (dimensions, direction, category filtering)
 - 🧠 Supports data attributes (`data-selected-icon`, `data-details`)
 
@@ -123,14 +122,8 @@ This makes it possible to turn TablerPicker into your **own custom icon library*
 ## 🧾 License
 
 MIT — use, modify and share freely 🚀  
-Icons belong to their respective authors (Tabler, Bootstrap, FontAwesome, etc). Attribution is appreciated.
+Icons belong to their respective author Tabler. Attribution is appreciated.
 
----
-
-## 🤝 Contributing
-
-PRs are welcome!  
-Help improve the picker, submit your icon categories, or contribute styling & UX.
 
 ---
 
